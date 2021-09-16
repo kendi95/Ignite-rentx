@@ -13,18 +13,13 @@ import {
   Type,
   CarImage
 } from './styles';
-import GasolineSVG from '../../assets/gasoline.svg';
+
+import { AcessoryIcon } from '../AcessoryIcon';
+
+import { CarDTO } from '../../dtos/CarDTO';
 
 interface Props extends RectButtonProps {
-  data: {
-    brand: string;
-    name: string;
-    rent: {
-      period: string;
-      price: number;
-    },
-    thumbnail: string;
-  }
+  data: CarDTO;
 }
 
 export const Card: FC<Props> = ({ data, ...rest }) => {
@@ -43,7 +38,8 @@ export const Card: FC<Props> = ({ data, ...rest }) => {
             </Rent>
             
             <Type>
-              <GasolineSVG />
+              <AcessoryIcon type={data.fuel_type} />
+              {/* <GasolineSVG /> */}
             </Type>
           </About>
         </Details>
