@@ -116,7 +116,6 @@ export const DateValue = styled.Text`
   font-family: ${({ theme }) => theme.fonts.inter500};
   color: ${({ theme }) => theme.colors.title};
   font-size: ${RFValue(14)}px;
-  margin-top: 8px;
 `;
 
 export const CaledarIcon = styled.View`

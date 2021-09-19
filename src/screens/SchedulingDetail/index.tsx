@@ -1,19 +1,16 @@
-import React, { FC } from 'react';
-import { StatusBar } from 'react-native';
+import React, { FC, useState, useEffect } from 'react';
+import { Alert, StatusBar } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { useTheme } from 'styled-components';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { format, addDays } from 'date-fns';
 
 import { Acessory } from '../../components/Acessory';
 import { BackButton } from '../../components/BackButton';
 import { ImageSlider } from '../../components/ImageSlider';
-import SpeedSVG from '../../assets/speed.svg';
-import AccelerationSVG from '../../assets/acceleration.svg';
-import ForceSVG from '../../assets/force.svg';
-import GasolineSVG from '../../assets/gasoline.svg';
-import ExchangeSVG from '../../assets/exchange.svg';
-import PeopleSVG from '../../assets/people.svg';
+import { Button } from '../../components/Button';
+import { AcessoryIcon } from '../../components/AcessoryIcon';
 
 import {
   Container,
@@ -40,13 +37,67 @@ import {
   RentalPriceQuota,
   RentalPriceTotal
 } from './styles';
-import { Button } from '../../components/Button';
+
+import { CarDTO } from '../../dtos/CarDTO';
+import { api } from '../../services/api';
 
 interface Props {}
+
+interface Params {
+  car: CarDTO;
+  dates: Array<string>;
+}
+
+interface PeriodProps {
+  start: string;
+  end: string;
+}
 
 export const SchedulingDetail: FC<Props> = () => {
   const { colors } = useTheme();
   const { navigate, goBack } = useNavigation();
+  const { car, dates } = useRoute().params as Params;
+
+  const [period, setPeriod] = useState<PeriodProps>({
+    start: "",
+    end: ""
+  });
+
+  async function handleConfirmRental() {
+    try {
+      const { data } = await api
+        .get(`/schedules/${car.id}`);
+
+      const unvailable_dates = [
+        ...data.unvailable_dates,
+        ...dates
+      ];
+
+      await api.put(`/schedules/${car.id}`, {
+        id: car.id,
+        unvailable_dates
+      });
+      
+      navigate('SchedulingComplete' as never);
+    } catch (error) {
+      Alert
+        .alert("Erro", "Não foi possível confirmar o agendamento.");
+    }
+
+  }
+
+  useEffect(() => {
+    setPeriod({
+      start: format(
+        addDays(new Date(dates[0]), 1), 
+        'dd/MM/yyyy'
+        ),
+      end: format(
+        addDays(new Date(dates[dates.length - 1]), 1), 
+        'dd/MM/yyyy', 
+      )
+    });
+  }, [dates]);
 
   return (
     <Container>
@@ -61,32 +112,29 @@ export const SchedulingDetail: FC<Props> = () => {
       </Header>
 
       <CarImages>
-        <ImageSlider 
-          imageURLs={[
-            'https://e7.pngegg.com/pngimages/269/468/png-clipart-2018-audi-a5-2-0t-premium-hatchback-audi-sportback-concept-car-2018-audi-a5-coupe-audi-compact-car-sedan.png'
-          ]} 
-        />
+        <ImageSlider imageURLs={car.photos} />
       </CarImages>
 
       <Content>
         <Details>
           <Description>
-            <Brand>Audi</Brand>
-            <Name>R8</Name>
+            <Brand>{car.brand}</Brand>
+            <Name>{car.name}</Name>
           </Description>
           <Rent>
-            <Period>Ao dia</Period>
-            <Price>R$ 580</Price>
+            <Period>{car.rent.period}</Period>
+            <Price>R$ {car.rent.price}</Price>
           </Rent>
         </Details>
 
         <Acessories>
-          <Acessory name="380Km/h" icon={SpeedSVG} />
-          <Acessory name="3.2s" icon={AccelerationSVG} />
-          <Acessory name="800 HP" icon={ForceSVG} />
-          <Acessory name="Gasolina" icon={GasolineSVG} />
-          <Acessory name="Auto" icon={ExchangeSVG} />
-          <Acessory name="2 pessoas" icon={PeopleSVG} />
+          {car.accessories.map((accessory, index) => (
+            <Acessory
+              key={index}
+              name={accessory.name} 
+              icon={() => <AcessoryIcon type={accessory.type} />} 
+            />
+          ))}
         </Acessories>
 
         <RentalPeriod>
@@ -99,7 +147,9 @@ export const SchedulingDetail: FC<Props> = () => {
           </CaledarIcon>
           <DateInfo>
             <DateTitle>DE</DateTitle>
-            <DateValue>18/12/2021</DateValue>
+            <DateValue>
+              {period.start}
+            </DateValue>
           </DateInfo>
 
           <Feather 
@@ -110,15 +160,21 @@ export const SchedulingDetail: FC<Props> = () => {
 
           <DateInfo>
             <DateTitle>ATÉ</DateTitle>
-            <DateValue>14/05/2021</DateValue>
+            <DateValue>
+              {period.end}
+            </DateValue>
           </DateInfo>
         </RentalPeriod>
 
         <RentalPrice>
           <RentalPriceLabel>TOTAL</RentalPriceLabel>
           <RentalPriceDetail>
-            <RentalPriceQuota>R$ 580 x3 diárias</RentalPriceQuota>
-            <RentalPriceTotal>R$ 2.900</RentalPriceTotal>
+            <RentalPriceQuota>
+              R$ {car.rent.price} {dates.length}x diárias
+            </RentalPriceQuota>
+            <RentalPriceTotal>
+              R$ {car.rent.price * dates.length}
+            </RentalPriceTotal>
           </RentalPriceDetail>
         </RentalPrice>
       </Content>
@@ -127,7 +183,7 @@ export const SchedulingDetail: FC<Props> = () => {
         <Button 
           title="Alugar agora"
           color={colors.success} 
-          onPress={() => navigate('SchedulingComplete' as never)}
+          onPress={handleConfirmRental}
         />
       </Footer>
     </Container>

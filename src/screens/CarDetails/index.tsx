@@ -91,7 +91,11 @@ export const CarDetails: FC<Props> = () => {
           <Footer>
             <Button 
               title="Escolher período do aluguel" 
-              onPress={() => navigate('Scheduling' as never)}
+              onPress={() => navigate(
+                'Scheduling' as never,
+                { car } as never
+                )
+              }
             />
           </Footer>
         </>
