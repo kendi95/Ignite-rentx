@@ -1,5 +1,6 @@
 import axios from 'axios';
+import { ADDRESS, PORT } from '@env';
 
 export const api = axios.create({
-  baseURL: 'http://192.168.1.111:3030'
+  baseURL: `http://${ADDRESS}:${PORT}`
 });

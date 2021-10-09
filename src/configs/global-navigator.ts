@@ -8,6 +8,7 @@ declare global {
       Scheduling: string;
       SchedulingDetail: string;
       SchedulingComplete: string;
+      MyCars: string;
     }
   } 
 }

@@ -22,7 +22,7 @@ export const SchedulingComplete: FC<Props> = () => {
 
   function handleResetNavigation() {
     dispatch(
-      StackActions.popToTop()
+      StackActions.pop(4)
     );
   }
 

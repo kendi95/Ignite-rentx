@@ -62,26 +62,47 @@ export const SchedulingDetail: FC<Props> = () => {
     start: "",
     end: ""
   });
+  const [loading, setLoading] = useState(false);
 
   async function handleConfirmRental() {
     try {
+      setLoading(true);
       const { data } = await api
-        .get(`/schedules/${car.id}`);
+        .get(`/schedules_bycars/${car.id}`);
 
-      const unvailable_dates = [
+      const unvailable_dates = {
         ...data.unvailable_dates,
         ...dates
-      ];
+      };
 
-      await api.put(`/schedules/${car.id}`, {
+      await api.post(`/schedules_byuser`, {
+        user_id: 1,
+        car,
+        startDate: format(
+          addDays(new Date(dates[0]), 1), 
+          'dd/MM/yyyy'
+          ),
+        endDate: format(
+          addDays(new Date(dates[dates.length - 1]), 1), 
+          'dd/MM/yyyy', 
+        )
+      });
+
+      await api.put(`/schedules_bycars/${car.id}`, {
         id: car.id,
         unvailable_dates
       });
+
+      setLoading(false);
       
       navigate('SchedulingComplete' as never);
     } catch (error) {
+      setLoading(false);
+      console.log(error);
       Alert
         .alert("Erro", "Não foi possível confirmar o agendamento.");
+    } finally {
+      setLoading(false);
     }
 
   }
@@ -182,6 +203,8 @@ export const SchedulingDetail: FC<Props> = () => {
       <Footer>
         <Button 
           title="Alugar agora"
+          isLoading={loading}
+          isDisabled={loading}
           color={colors.success} 
           onPress={handleConfirmRental}
         />

@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import '../configs/global-navigator';
 
+import { Splash } from '../screens/Splash';
 import { Home } from '../screens/Home';
 import { CarDetails } from '../screens/CarDetails';
 import { Scheduling } from '../screens/Scheduling';
@@ -19,6 +20,7 @@ export const Routes: FC<Props> = () => {
   return (
     <NavigationContainer>
       <Navigator 
+        initialRouteName="Splash"
         defaultScreenOptions={{
           gestureEnabled: false
         }}
@@ -27,7 +29,14 @@ export const Routes: FC<Props> = () => {
         }}
       >
         <Group>
-          <Screen name="Home" component={Home} />
+          <Screen name="Splash" component={Splash} />
+          <Screen 
+            name="Home" 
+            component={Home} 
+            options={{
+              gestureEnabled: false
+            }}
+          />
           <Screen 
             name="CarDetails" 
             component={CarDetails}

@@ -144,6 +144,7 @@ export const Scheduling: FC<Props> = () => {
       <Footer>
         <Button 
           title="Confirmar" 
+          isDisabled={!rentalPeriod.startFormatted ? true : false}
           onPress={handleConfirmRentalPeriod}    
         />
       </Footer>

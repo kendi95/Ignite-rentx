@@ -1,7 +1,14 @@
 import React, { FC } from 'react';
-import { StatusBar, ActivityIndicator } from 'react-native';
+import { StatusBar } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useTheme } from 'styled-components';
+import Animated, { 
+  Extrapolate, 
+  interpolate, 
+  useAnimatedScrollHandler, 
+  useAnimatedStyle, 
+  useSharedValue 
+} from 'react-native-reanimated';
 
 import { Acessory } from '../../components/Acessory';
 import { BackButton } from '../../components/BackButton';
@@ -40,6 +47,34 @@ export const CarDetails: FC<Props> = () => {
 
   const { car } = useRoute().params as Params;
 
+  const scrollY = useSharedValue(0);
+
+  const scrollHandler = useAnimatedScrollHandler((event) => {
+    scrollY.value = event.contentOffset.y;
+  });
+
+  const headerStyleAnimation = useAnimatedStyle(() => {
+    return {
+      height: interpolate(
+        scrollY.value,
+        [0, 200],
+        [200, 100],
+        Extrapolate.CLAMP
+      ),
+    }
+  });
+
+  const imageSliderStyleAnimation = useAnimatedStyle(() => {
+    return {
+      opacity: interpolate(
+        scrollY.value,
+        [0, 200],
+        [1, 0],
+        Extrapolate.CLAMP
+      )
+    }
+  });
+
   return (
     <Container>
       <StatusBar 
@@ -48,65 +83,69 @@ export const CarDetails: FC<Props> = () => {
         backgroundColor="transparent"
       />
 
-      <Header>
-        <BackButton onPress={goBack} />
-      </Header>
+      <Animated.View
+        style={[headerStyleAnimation]}
+      >
+        <Header>
+          <BackButton onPress={goBack} />
+        </Header>
 
-      {car.id ? (
-        <>
-          <CarImages>
-            <ImageSlider 
-              imageURLs={car.photos} 
+        <CarImages
+          style={[imageSliderStyleAnimation]}
+        >
+          <ImageSlider 
+            imageURLs={car.photos} 
+          />
+        </CarImages>
+
+      </Animated.View>
+
+      <Content
+        onScroll={scrollHandler}
+        scrollEventThrottle={11}
+      >
+        <Details>
+          <Description>
+            <Brand>{car.brand}</Brand>
+            <Name>{car.name}</Name>
+          </Description>
+          <Rent>
+            <Period>{car.rent.period}</Period>
+            <Price>R$ {car.rent.price}</Price>
+          </Rent>
+        </Details>
+
+        <Acessories>
+          {car.accessories.map((acessory, index) => (
+            <Acessory 
+              key={index}
+              name={acessory.name} 
+              icon={() => <AcessoryIcon type={acessory.type} />} 
             />
-          </CarImages>
+          ))}
+        </Acessories>
 
-          <Content>
-            <Details>
-              <Description>
-                <Brand>{car.brand}</Brand>
-                <Name>{car.name}</Name>
-              </Description>
-              <Rent>
-                <Period>{car.rent.period}</Period>
-                <Price>R$ {car.rent.price}</Price>
-              </Rent>
-            </Details>
+        <About>
+          {car.about}
+          {car.about}
+          {car.about}
+          {car.about}
+          {car.about}
+          {car.about}
+        </About>
 
-            <Acessories>
-              {car.accessories.map((acessory, index) => (
-                <Acessory 
-                  key={index}
-                  name={acessory.name} 
-                  icon={() => <AcessoryIcon type={acessory.type} />} 
-                />
-              ))}
-            </Acessories>
+      </Content>
 
-            <About>
-              {car.about}
-            </About>
-
-          </Content>
-
-          <Footer>
-            <Button 
-              title="Escolher período do aluguel" 
-              onPress={() => navigate(
-                'Scheduling' as never,
-                { car } as never
-                )
-              }
-            />
-          </Footer>
-        </>
-      ) : (
-        <ActivityIndicator 
-          color={colors.header} 
-          size="large" 
-          style={{ flex: 1 }}
-        /> 
-      )}
-
+      <Footer>
+        <Button 
+          title="Escolher período do aluguel" 
+          onPress={() => navigate(
+            'Scheduling' as never,
+            { car } as never
+            )
+          }
+        />
+      </Footer>
     </Container>
   );
 
