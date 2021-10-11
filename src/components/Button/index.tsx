@@ -11,13 +11,17 @@ import {
 interface Props extends RectButtonProps {
   title: string;
   color?: string;
+  textColor?: string;
   isDisabled?: boolean;
   isLoading?: boolean;
+  marginBottom?: number;
 }
 
 export const Button: FC<Props> = ({ 
   title, 
   color,
+  textColor,
+  marginBottom,
   isDisabled = false, 
   isLoading = false,
   ...rest 
@@ -29,6 +33,7 @@ export const Button: FC<Props> = ({
       { ...rest } 
       color={color}
       enabled={!isDisabled}
+      marginBottom={marginBottom}
       style={{
         opacity: isDisabled ? 0.6 : 1
       }}
@@ -36,7 +41,7 @@ export const Button: FC<Props> = ({
       {isLoading ? (
         <ActivityIndicator color={colors.shape} />
       ) : (
-        <Title>{title}</Title>
+        <Title color={textColor}>{title}</Title>
       )}
     </Container>
   );

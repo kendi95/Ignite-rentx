@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { 
   useFonts,
   Inter_400Regular,
@@ -12,8 +12,10 @@ import {
 import AppLoading from 'expo-app-loading';
 import { ThemeProvider } from 'styled-components';
 
+
 import { theme } from './src/styles/theme';
 import './src/configs/calendar-locale';
+
 
 import { Routes } from './src/routes';
 
